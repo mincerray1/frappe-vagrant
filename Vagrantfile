@@ -44,34 +44,48 @@ end
 
 Vagrant.configure("2") do |config|
   config.vbguest.auto_update=false
-  config.vm.box = "bento/ubuntu-16.04"
+  config.vm.box = "ubuntu/focal64"
+
+  # Create a private network, which allows host-only access to the machine
+  # using a specific IP.
+  config.vm.network "private_network", ip: "192.168.33.11"
+
+  # Create a public network, which generally matched to bridged network.
+  # Bridged networks make the machine appear as another physical device on
+  # your network.
+  config.vm.network "public_network"
+
   config.vm.network "forwarded_port", guest: 8000, host: 8000
+  config.vm.network "forwarded_port", guest: 8001, host: 8001
   config.vm.network "forwarded_port", guest: 9000, host: 9000
+  config.vm.network "forwarded_port", guest: 9001, host: 9001
   config.vm.network "forwarded_port", guest: 6787, host: 6787
 
   config.ssh.forward_agent = true
 
+  config.vm.synced_folder "./", "/vagrant"
+
   # Windows specific synced_folder settings
-  if Vagrant::Util::Platform.windows? then
-    if Vagrant.has_plugin?("vagrant-fsnotify") then
-      # uses fsnotify to simulate file events on guest from windows
-      config.vm.synced_folder "./", "/vagrant", fsnotify: [:modified, :removed], exclude: ["*.pyc", "*.pyd", "*.pyo", ".git/*"]
-      # On windows, we auto start fsnotify.
-      config.trigger.after :up, :reload do |t|
-        t.name = "FSNotify"
-	t.info = "Starts the fsnotify watcher plugin"
-        t.run = { inline: "vagrant fsnotify" }
-      end
-    end
-  else
-    config.vm.synced_folder "./", "/vagrant"
-  end
+#   if Vagrant::Util::Platform.windows? then
+#     if Vagrant.has_plugin?("vagrant-fsnotify") then
+#       # uses fsnotify to simulate file events on guest from windows
+#       config.vm.synced_folder "./", "/vagrant", fsnotify: [:modified, :removed] # , exclude: ["*.pyc", "*.pyd", "*.pyo", ".git/*"]
+#       # On windows, we auto start fsnotify.
+#       config.trigger.after :up, :reload do |t|
+#         t.name = "FSNotify"
+# 	t.info = "Starts the fsnotify watcher plugin"
+#         t.run = { inline: "vagrant fsnotify" }
+#       end
+#     end
+#   else
+#     config.vm.synced_folder "./", "/vagrant"
+#   end
 
   
   config.vm.provider "virtualbox" do |vb|
      # Customize the amount of memory and CPU on the VM:
-     vb.memory = "2048"
-     vb.cpus = 2
+     vb.memory = "4096"
+    #  vb.cpus = 2
      # uses dns host resolver to prevent connectivity issues.
      vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
      
@@ -82,9 +96,9 @@ Vagrant.configure("2") do |config|
   end
 
   # ups the inotify watches
-  config.vm.provision "shell", privileged: true, inline: <<-SHELL
-    echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
-  SHELL
+#   config.vm.provision "shell", privileged: true, inline: <<-SHELL
+#     echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
+#   SHELL
 
   config.vm.provision "shell", privileged: false, inline: <<-SHELL
     cp /vagrant/install.sh /tmp/

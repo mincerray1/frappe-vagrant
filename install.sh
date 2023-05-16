@@ -38,14 +38,19 @@ sudo apt-get install -y curl
 curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash -
 sudo apt-get install -y nodejs
 
+cd /home/vagrant/
 sudo pip3 install frappe-bench
 sudo npm install -g yarn
 
 chmod -R o+rx /home/vagrant/
 
-bench init frappe-bench --verbose --frappe-branch version-14 --python /usr/bin/python3.10
+## bench init frappe-bench --verbose --frappe-branch version-14 --python /usr/bin/python3.10
+echo "## bench init"
+bench init --verbose --frappe-path https://github.com/frappe/frappe --frappe-branch version-14 --python /usr/bin/python3.10 frappe-bench
 
-cd ~/frappe-bench
+## Create site and set it as default
+echo "## Create site and set it as default"
+cd /home/vagrant/frappe-bench
 
 bench new-site site1.local --db-root-password frappe --admin-password admin
 

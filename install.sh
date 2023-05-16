@@ -1,79 +1,27 @@
-# Variables
-echo "# Variables"
-
-frappe_version="version-14"
-erpnext_version="version-14"
-
-# Set correct timezone
-# timedatectl set-timezone "Asia/Manila"
-
-# Set noninteractive and set mariadb password
 echo "# Set noninteractive and set mariadb password"
+
 export DEBIAN_FRONTEND=noninteractive
 sudo debconf-set-selections <<< 'mariadb-server-10.3 mysql-server/root_password password frappe'
 sudo debconf-set-selections <<< 'mariadb-server-10.3 mysql-server/root_password_again password frappe'
 
-echo "# sudo apt-get update -y"
+sudo apt-get clean -y
+sudo apt-get autoremove -y
+sudo apt --fix-broken install -y
+sudo dpkg --configure -a
+
+sudo apt-get install -f
 sudo apt-get update -y
 sudo apt-get upgrade -y
+sudo apt-get install git python3-dev python-setuptools python3-pip python3-distutils redis-server -y
+sudo apt install python3-venv -y
+sudo apt-get update -y
+sudo apt-get install xvfb libfontconfig -y
+wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-2/wkhtmltox_0.12.6.1-2.jammy_amd64.deb
+sudo apt install ./wkhtmltox_0.12.6.1-2.jammy_amd64.deb -y
+rm wkhtmltox_0.12.6.1-2.jammy_amd64.deb
+sudo apt-get install mariadb-server mariadb-client -y
 
-# Install packages
-echo "# Install packages"
-sudo apt-get install -y git
-sudo add-apt-repository ppa:deadsnakes/ppa -y
-sudo apt-get install -y python3-dev python3.10 python3.10-dev python3-setuptools python3.10-distutils python3.10-venv
-sudo apt-get install -y software-properties-common mariadb-server mariadb-client redis-server
-sudo apt-get install -y libmysqlclient-dev xvfb libfontconfig
-
-# Install curl
-echo "# Install curl"
-sudo apt-get install -y curl
-
-# Install pip
-echo "# Install pip"
-curl -sS https://bootstrap.pypa.io/get-pip.py | python3.10
-export PATH=$PATH:/home/vagrant/.local/bin
-# sudo apt-get install -y python3-pip
-
-# wkhtmltopdf
-echo "# wkhtmltopdf"
-wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox_0.12.6-1.focal_amd64.deb
-sudo apt install ./wkhtmltox_0.12.6-1.focal_amd64.deb
-rm wkhtmltox_0.12.6-1.focal_amd64.deb
-
-# python3 aliases
-echo "# python3 aliases"
-alias python=python3.10
-alias pip=pip3
-
-# html5lib
-echo "# html5lib"
-pip3 install html5lib
-
-# NodeJS
-echo "# NodeJS"
-# curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | sudo -E bash -
-curl -sL https://deb.nodesource.com/setup_16.x -o nodesource_setup.sh
-
-echo "sudo bash nodesource_setup.sh"
-sudo bash nodesource_setup.sh
-# echo "# source ~/.profile"
-# source ~/.profile
-
-# Install nodejs
-echo "sudo apt-get install -y nodejs"
-sudo apt-get install -y nodejs
-
-# echo "# nvm install 16.15.0"
-# nvm install 16.15.0
-
-# npm
-echo "# npm"
-sudo apt-get install -y npm
-
-# Install yarn
-echo "# Install yarn"
-sudo npm install -g yarn
+sudo apt install python3.10-venv -y
 
 # Configure MariaDB
 echo "# Configure MariaDB"
@@ -84,30 +32,27 @@ sudo mariadb -u root -pfrappe -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'localho
 sudo mariadb -u root -pfrappe -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY 'frappe' WITH GRANT OPTION;"
 sudo mariadb -u root -pfrappe -e "FLUSH PRIVILEGES;"
 
-# pip install --upgrade virtualenv
-echo "pip install --upgrade virtualenv"
-pip install --upgrade virtualenv
 
 
-# Install bench package and init bench folder
-echo "# Install bench package and init bench folder"
-cd /home/vagrant/
-pip3 install frappe-bench
-bench --version
-bench init --frappe-path https://github.com/frappe/frappe --frappe-branch ${frappe_version} --python /usr/bin/python3.10 frappe-bench-${frappe_version}
+sudo apt-get install -y curl
+curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+sudo apt-get install -y nodejs
 
+sudo pip3 install frappe-bench
+sudo npm install -g yarn
 
-## Create site and set it as default
-echo "## Create site and set it as default"
-cd /home/vagrant/frappe-bench-${frappe_version}
-./env/bin/pip3 install -e apps/frappe/
 chmod -R o+rx /home/vagrant/
+
+bench init frappe-bench --verbose --frappe-branch version-14 --python /usr/bin/python3.10
+
+cd ~/frappe-bench
+
 bench new-site site1.local --db-root-password frappe --admin-password admin
 
 bench use site1.local
 bench enable-scheduler
 
-# Install apps
+## apps
 
 # Install Payments
 echo "# Install Payments"
@@ -120,13 +65,13 @@ bench install-app payments
 
 # Install ERPNext
 echo "# Install ERPNext"
-bench get-app erpnext --branch ${erpnext_version}
+bench get-app erpnext --branch version-14
 bench install-app erpnext
 ./env/bin/pip3 install -e apps/erpnext/
 
 # Install HRMS
 echo "# Install HRMS"
-bench get-app hrms
+bench get-app hrms --branch version-14
 bench install-app hrms
 ./env/bin/pip3 install -e apps/hrms/
 
@@ -150,16 +95,21 @@ bench config dns_multitenant on
 
 # Move apps to shared Vagrant folder
 echo "# Move apps to shared Vagrant folder"
-mv /home/vagrant/frappe-bench-${frappe_version}/apps /vagrant/
-mkdir -p /home/vagrant/frappe-bench-${frappe_version}/apps
+mv /home/vagrant/frappe-bench/apps /vagrant/
+mkdir -p /home/vagrant/frappe-bench/apps
+
+# Move apps to shared Vagrant folder
+echo "# Move apps to shared Vagrant folder"
+mv /home/vagrant/frappe-bench/apps /vagrant/
+mkdir -p /home/vagrant/frappe-bench/apps
 
 # Fixes Redis warning about memory and cpu latency.
 echo "# Fixes Redis warning about memory and cpu latency."
 echo 'never' | sudo tee --append /sys/kernel/mm/transparent_hugepage/enabled
 
 # Fixes redis warning about background saves
-echo "# Fixes redis warning about background saves"
 echo 'vm.overcommit_memory = 1' | sudo tee --append /etc/sysctl.conf
+echo "# Fixes redis warning about background saves"
 # set without restart
 sudo sysctl vm.overcommit_memory=1
 
@@ -176,6 +126,6 @@ echo "
 if mount | grep /vagrant/apps > /dev/null; then
 	echo '/vagrant/apps already mounted.'
 else
-	sudo mount --bind /vagrant/apps /home/vagrant/frappe-bench-${frappe_version}/apps
+	sudo mount --bind /vagrant/apps /home/vagrant/frappe-bench/apps
 fi
 " >> ~/.profile

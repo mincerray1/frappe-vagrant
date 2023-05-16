@@ -5,7 +5,7 @@ This is a Vagrantfile that builds frappe from scratch that shares the apps folde
 Features : 
 
 * Minimal installation
-* Shares the `apps` folder in `frappe-bench-version-14` in the vagrant folder
+* Shares the `apps` folder in `frappe-bench` in the vagrant folder
 * Access your site on port `8000`
 * Default MariaDB password is "frappe"
 

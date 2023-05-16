@@ -44,7 +44,7 @@ end
 
 Vagrant.configure("2") do |config|
   config.vbguest.auto_update=false
-  config.vm.box = "ubuntu/focal64"
+  config.vm.box = "ubuntu/jammy64"
 
   # Create a private network, which allows host-only access to the machine
   # using a specific IP.

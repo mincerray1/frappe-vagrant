@@ -46,7 +46,7 @@ chmod -R o+rx /home/vagrant/
 
 ## bench init frappe-bench --verbose --frappe-branch version-14 --python /usr/bin/python3.10
 echo "## bench init"
-bench init --verbose --frappe-path https://github.com/frappe/frappe --frappe-branch version-14 --python /usr/bin/python3.10 frappe-bench
+bench init --verbose --frappe-path https://github.com/frappe/frappe --frappe-branch version-13 --python /usr/bin/python3.10 frappe-bench
 
 ## Create site and set it as default
 echo "## Create site and set it as default"
@@ -60,31 +60,31 @@ bench enable-scheduler
 ## apps
 
 # Install Payments
-echo "# Install Payments"
-bench get-app payments
-bench install-app payments
-./env/bin/pip3 install -e apps/payments/
+# echo "# Install Payments"
+# bench get-app payments
+# bench install-app payments
+# ./env/bin/pip3 install -e apps/payments/
 
 # pip install cython>=0.29.21,<1.0.0
 ./env/bin/pip3 install cython==0.29.21
 
 # Install ERPNext
 echo "# Install ERPNext"
-bench get-app erpnext --branch version-14
+bench get-app erpnext --branch version-13
 bench install-app erpnext
 ./env/bin/pip3 install -e apps/erpnext/
 
 # Install HRMS
-echo "# Install HRMS"
-bench get-app hrms --branch version-14
-bench install-app hrms
-./env/bin/pip3 install -e apps/hrms/
+# echo "# Install HRMS"
+# bench get-app hrms --branch version-14
+# bench install-app hrms
+# ./env/bin/pip3 install -e apps/hrms/
 
 # Install ecommerce_integrations 
-echo "# Install ecommerce_integrations "
-bench get-app ecommerce_integrations --branch main
-bench install-app ecommerce_integrations 
-./env/bin/pip3 install -e apps/ecommerce_integrations/
+# echo "# Install ecommerce_integrations "
+# bench get-app ecommerce_integrations --branch main
+# bench install-app ecommerce_integrations 
+# ./env/bin/pip3 install -e apps/ecommerce_integrations/
 
 # Enable developer mode
 echo "# Enable developer mode"

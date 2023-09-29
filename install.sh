@@ -86,6 +86,12 @@ bench get-app ecommerce_integrations --branch main
 bench install-app ecommerce_integrations 
 ./env/bin/pip3 install -e apps/ecommerce_integrations/
 
+# Install phbir 
+echo "# Install phbir "
+bench get-app https://github.com/mincerray1/phbir.git --branch version-14
+bench install-app phbir 
+./env/bin/pip3 install -e apps/phbir/
+
 # Enable developer mode
 echo "# Enable developer mode"
 bench set-config developer_mode 1
